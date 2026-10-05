@@ -8,7 +8,10 @@ import matplotlib.pyplot as plt
 pd.set_option("display.max_columns", 30)
 pd.set_option("display.width", 160)
 
-URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/autos/imports-85.data"
+URL = (
+    "https://archive.ics.uci.edu/ml/machine-learning-databases/"
+    "autos/imports-85.data"
+)
 DATA = Path("data")
 FIGS = Path("figures")
 DATA.mkdir(exist_ok=True)
@@ -33,15 +36,19 @@ plt.rcParams.update({
 
 print("pandas", pd.__version__, "numpy", np.__version__)
 
-headers = ["symboling", "normalized-losses", "make", "fuel-type", "aspiration",
-           "num-of-doors", "body-style", "drive-wheels", "engine-location",
-           "wheel-base", "length", "width", "height", "curb-weight", "engine-type",
-           "num-of-cylinders", "engine-size", "fuel-system", "bore", "stroke",
-           "compression-ratio", "horsepower", "peak-rpm", "city-mpg",
-           "highway-mpg", "price"]
+headers = [
+    "symboling", "normalized-losses", "make", "fuel-type",
+    "aspiration", "num-of-doors", "body-style", "drive-wheels",
+    "engine-location", "wheel-base", "length", "width", "height",
+    "curb-weight", "engine-type", "num-of-cylinders", "engine-size",
+    "fuel-system", "bore", "stroke", "compression-ratio",
+    "horsepower", "peak-rpm", "city-mpg", "highway-mpg", "price",
+]
 df = pd.read_csv(RAW, names=headers)
 print(df.shape)
-print(df.head())
+print(df.iloc[:5, :13])
+
+print(df.iloc[:5, 13:])
 
 df = df.replace("?", np.nan)
 missing_data = df.isnull()
@@ -53,7 +60,9 @@ print(missing_before.to_frame("NaN"))
 for column in missing_before.index:
     print(column, missing_data[column].value_counts().to_dict())
 
-numeric_cols = ["normalized-losses", "bore", "stroke", "horsepower", "peak-rpm", "price"]
+numeric_cols = [
+    "normalized-losses", "bore", "stroke", "horsepower", "peak-rpm", "price",
+]
 df[numeric_cols] = df[numeric_cols].astype("float")
 print(df.dtypes.value_counts())
 
@@ -89,8 +98,9 @@ print(pd.DataFrame(fill_report, index=["NaN", "rule", "value"]).T)
 
 df[["normalized-losses"]] = df[["normalized-losses"]].astype("int")
 df[["horsepower"]] = df[["horsepower"]].astype("int")
-df[["price", "peak-rpm", "bore", "stroke"]] = df[["price", "peak-rpm", "bore", "stroke"]].astype("float")
-print(df[["normalized-losses", "bore", "stroke", "horsepower", "peak-rpm", "price"]].dtypes)
+float_cols = ["price", "peak-rpm", "bore", "stroke"]
+df[float_cols] = df[float_cols].astype("float")
+print(df[numeric_cols].dtypes)
 
 df["city-L/100km"] = 235 / df["city-mpg"]
 df["highway-L/100km"] = 235 / df["highway-mpg"]
@@ -100,7 +110,9 @@ height_raw = df["height"].copy()
 h_min, h_max = height_raw.min(), height_raw.max()
 h_mean, h_std = height_raw.mean(), height_raw.std()
 h_range = np.ptp(height_raw)
-print("min", h_min, "max", h_max, "range", round(h_range, 4), "mean", round(h_mean, 4), "std", round(h_std, 4))
+print("min", h_min, "max", h_max, "range", round(h_range, 4))
+print("mean", round(h_mean, 4), "std", round(h_std, 4))
+print("max height:", df.loc[height_raw == h_max, "make"].tolist())
 df["height"] = height_raw.sub(h_min) / h_range
 comparison = pd.DataFrame({
     "height_raw": height_raw,
@@ -124,7 +136,9 @@ fig.savefig(FIGS / "height_normalization.png", dpi=200)
 
 bins = np.linspace(df["horsepower"].min(), df["horsepower"].max(), 4)
 group_names = ["Low", "Medium", "High"]
-df["horsepower-binned"] = pd.cut(df["horsepower"], bins, labels=group_names, include_lowest=True)
+df["horsepower-binned"] = pd.cut(
+    df["horsepower"], bins, labels=group_names, include_lowest=True
+)
 print("bins:", bins.round(2).tolist())
 print(df["horsepower-binned"].value_counts().reindex(group_names))
 
@@ -145,18 +159,23 @@ fig.tight_layout()
 fig.savefig(FIGS / "horsepower_binning.png", dpi=200)
 
 dummy_variable_2 = pd.get_dummies(df["aspiration"], dtype=int)
-dummy_variable_2 = dummy_variable_2.rename(columns={"std": "aspiration-std", "turbo": "aspiration-turbo"})
+dummy_variable_2 = dummy_variable_2.rename(
+    columns={"std": "aspiration-std", "turbo": "aspiration-turbo"}
+)
 print(dummy_variable_2.sum().to_dict())
 print(dummy_variable_2.head())
 
 df = pd.concat([df, dummy_variable_2], axis=1)
 df = df.drop("aspiration", axis=1)
 print("aspiration" in df.columns, df.shape)
-print(df[["make", "fuel-type", "aspiration-std", "aspiration-turbo", "height", "horsepower-binned"]].head())
+df[["make", "fuel-type", "aspiration-std", "aspiration-turbo",
+    "height", "horsepower-binned"]].head()
 
 fig, ax = plt.subplots(figsize=(8, 3.6))
-ax.barh(missing_before.index[::-1], missing_before.values[::-1], color=PALETTE[0])
-for y, v in enumerate(missing_before.values[::-1]):
+labels = missing_before.index[::-1]
+values = missing_before.values[::-1]
+ax.barh(labels, values, color=PALETTE[0])
+for y, v in enumerate(values):
     ax.text(v + 0.5, y, str(v), va="center", color="#0b0b0b")
 ax.set_xlabel("NaN count before cleaning")
 ax.set_title("Missing values by column")
