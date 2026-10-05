@@ -13,7 +13,7 @@
 ```
 pip install -r requirements.txt
 cd lab1
-jupyter nbconvert --to notebook --execute --inplace data_wrangling.ipynb
+jupyter notebook data_wrangling.ipynb
 ```
 
 або
