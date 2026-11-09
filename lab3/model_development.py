@@ -115,7 +115,7 @@ task1 = pd.DataFrame([
     evaluate("SLR engine-size", LinearRegression(), df[["engine-size"]]),
     evaluate("SLR highway-mpg", LinearRegression(), df[["highway-mpg"]]),
 ])
-resid = Y - Yhat
+resid = Y.sub(Yhat)
 print("residual mean =", round(resid.mean(), 6), " residual std =", round(resid.std(), 2))
 print("share of |residual| > 5000:", round((resid.abs() > 5000).mean(), 4))
 print(task1)
@@ -170,7 +170,8 @@ pipe11.fit(df[["highway-mpg"]], y)
 yhat_pipe = pipe11.predict(df[["highway-mpg"]])
 print("Pipeline deg 11 R^2 =", r2_score(y, yhat_pipe))
 print("Pipeline deg 11 MSE =", mean_squared_error(y, yhat_pipe))
-print("max |polyfit - pipeline| =", np.abs(p11(x) - yhat_pipe).max().round(2))
+gap = np.abs(np.subtract(p11(x), yhat_pipe))
+print("max |polyfit vs pipeline| =", gap.max().round(2), " at highway-mpg =", x[gap.argmax()])
 
 def plot_polly(ax, model, xs, ys, name, color):
     x_new = np.linspace(15, 55, 300)
