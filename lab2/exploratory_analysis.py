@@ -24,28 +24,52 @@ if not RAW.exists():
     urlretrieve(URL, RAW)
 
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"]
-plt.rcParams.update({
-    "axes.edgecolor": "#52514e",
-    "axes.labelcolor": "#0b0b0b",
-    "xtick.color": "#52514e",
-    "ytick.color": "#52514e",
-    "axes.grid": True,
-    "grid.color": "#e1e0d9",
-    "axes.axisbelow": True,
-    "axes.spines.top": False,
-    "axes.spines.right": False,
-    "font.size": 11,
-})
+plt.rcParams.update(
+    {
+        "axes.edgecolor": "#52514e",
+        "axes.labelcolor": "#0b0b0b",
+        "xtick.color": "#52514e",
+        "ytick.color": "#52514e",
+        "axes.grid": True,
+        "grid.color": "#e1e0d9",
+        "axes.axisbelow": True,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "font.size": 11,
+    }
+)
 
-print("pandas", pd.__version__, "seaborn", sns.__version__, "scipy", scipy.__version__)
+print(
+    "pandas", pd.__version__, "seaborn", sns.__version__, "scipy", scipy.__version__
+)
 
 headers = [
-    "symboling", "normalized-losses", "make", "fuel-type",
-    "aspiration", "num-of-doors", "body-style", "drive-wheels",
-    "engine-location", "wheel-base", "length", "width", "height",
-    "curb-weight", "engine-type", "num-of-cylinders", "engine-size",
-    "fuel-system", "bore", "stroke", "compression-ratio",
-    "horsepower", "peak-rpm", "city-mpg", "highway-mpg", "price",
+    "symboling",
+    "normalized-losses",
+    "make",
+    "fuel-type",
+    "aspiration",
+    "num-of-doors",
+    "body-style",
+    "drive-wheels",
+    "engine-location",
+    "wheel-base",
+    "length",
+    "width",
+    "height",
+    "curb-weight",
+    "engine-type",
+    "num-of-cylinders",
+    "engine-size",
+    "fuel-system",
+    "bore",
+    "stroke",
+    "compression-ratio",
+    "horsepower",
+    "peak-rpm",
+    "city-mpg",
+    "highway-mpg",
+    "price",
 ]
 df = pd.read_csv(RAW, names=headers)
 df = df.replace("?", np.nan)
@@ -67,21 +91,38 @@ print(df.describe().T.round(3))
 print(df.describe(include=["object", "str"]).T)
 
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.8))
-pairs = [("engine-size", PALETTE[0]), ("highway-mpg", PALETTE[1]), ("peak-rpm", PALETTE[2])]
+pairs = [
+    ("engine-size", PALETTE[0]),
+    ("highway-mpg", PALETTE[1]),
+    ("peak-rpm", PALETTE[2]),
+]
 for ax, (col, color) in zip(axes, pairs):
-    sns.regplot(x=col, y="price", data=df, ax=ax, color=color,
-                scatter_kws={"s": 14, "alpha": 0.7}, line_kws={"color": "#0b0b0b"})
+    sns.regplot(
+        x=col,
+        y="price",
+        data=df,
+        ax=ax,
+        color=color,
+        scatter_kws={"s": 14, "alpha": 0.7},
+        line_kws={"color": "#0b0b0b"},
+    )
     r = df[[col, "price"]].corr().iloc[0, 1]
     ax.set_title(f"{col}: r = {r:.4f}")
-    ax.set_ylim(0,)
+    ax.set_ylim(
+        0,
+    )
 fig.tight_layout()
 fig.savefig(FIGS / "regplots_price.png", dpi=200)
 plt.close("all")
 print(df[["engine-size", "highway-mpg", "peak-rpm", "price"]].corr().round(4))
 
-fig, axes = plt.subplots(1, 3, figsize=(13, 3.8), gridspec_kw={"width_ratios": [5, 2, 3]})
+fig, axes = plt.subplots(
+    1, 3, figsize=(13, 3.8), gridspec_kw={"width_ratios": [5, 2, 3]}
+)
 order = df.groupby("body-style")["price"].median().sort_values().index
-sns.boxplot(x="body-style", y="price", data=df, order=order, ax=axes[0], color=PALETTE[0])
+sns.boxplot(
+    x="body-style", y="price", data=df, order=order, ax=axes[0], color=PALETTE[0]
+)
 sns.boxplot(x="engine-location", y="price", data=df, ax=axes[1], color=PALETTE[1])
 sns.boxplot(x="drive-wheels", y="price", data=df, ax=axes[2], color=PALETTE[2])
 for ax in axes:
@@ -101,14 +142,17 @@ print(engine_loc_counts)
 
 print(df["drive-wheels"].unique())
 df_group_one = df[["drive-wheels", "body-style", "price"]]
-df_group_one = df_group_one.groupby(["drive-wheels"], as_index=False)["price"].mean()
+df_group_one = df_group_one.groupby(["drive-wheels"], as_index=False)[
+    "price"
+].mean()
 print(df_group_one)
 
 df_gptest = df[["drive-wheels", "body-style", "price"]]
 grouped_test1 = df_gptest.groupby(["drive-wheels", "body-style"], as_index=False)
 grouped_test1 = grouped_test1["price"].mean()
-grouped_pivot = grouped_test1.pivot(index="drive-wheels", columns="body-style",
-                                    values="price")
+grouped_pivot = grouped_test1.pivot(
+    index="drive-wheels", columns="body-style", values="price"
+)
 grouped_pivot = grouped_pivot.fillna(0)
 print(grouped_pivot.round(1))
 
@@ -121,8 +165,14 @@ ax.set_ylabel("drive-wheels")
 ax.grid(False)
 for i in range(grouped_pivot.shape[0]):
     for j in range(grouped_pivot.shape[1]):
-        ax.text(j + 0.5, i + 0.5, f"{grouped_pivot.iloc[i, j]:.0f}",
-                ha="center", va="center", fontsize=9)
+        ax.text(
+            j + 0.5,
+            i + 0.5,
+            f"{grouped_pivot.iloc[i, j]:.0f}",
+            ha="center",
+            va="center",
+            fontsize=9,
+        )
 fig.colorbar(im)
 fig.tight_layout()
 fig.savefig(FIGS / "heatmap_drive_body.png", dpi=200)
@@ -132,8 +182,17 @@ task1 = df[["bore", "stroke", "compression-ratio", "horsepower"]].corr()
 print(task1.round(4))
 
 fig, ax = plt.subplots(figsize=(4.8, 3.8))
-sns.heatmap(task1, annot=True, fmt=".3f", cmap="RdBu", vmin=-1, vmax=1, square=True, ax=ax,
-            cbar_kws={"shrink": 0.8})
+sns.heatmap(
+    task1,
+    annot=True,
+    fmt=".3f",
+    cmap="RdBu",
+    vmin=-1,
+    vmax=1,
+    square=True,
+    ax=ax,
+    cbar_kws={"shrink": 0.8},
+)
 ax.tick_params(axis="x", rotation=30, labelsize=9)
 ax.tick_params(axis="y", labelsize=9)
 fig.tight_layout()
@@ -142,7 +201,7 @@ plt.close("all")
 
 task2 = df[["stroke", "price"]].corr()
 r_stroke = task2.loc["stroke", "price"]
-print("r(stroke, price) =", round(r_stroke, 4), " r^2 =", round(r_stroke ** 2, 4))
+print("r(stroke, price) =", round(r_stroke, 4), " r^2 =", round(r_stroke**2, 4))
 print(task2.round(4))
 
 r_s, p_s = stats.pearsonr(df["stroke"], df["price"])
@@ -150,15 +209,28 @@ rho_s, p_rho = stats.spearmanr(df["stroke"], df["price"])
 print("Pearson  r =", round(r_s, 4), " p =", round(p_s, 4))
 print("Spearman rho =", round(rho_s, 4), " p =", round(p_rho, 4))
 fig, ax = plt.subplots(figsize=(6, 3.8))
-sns.regplot(x="stroke", y="price", data=df, ax=ax, color=PALETTE[3],
-            scatter_kws={"s": 14, "alpha": 0.7}, line_kws={"color": "#0b0b0b"})
+sns.regplot(
+    x="stroke",
+    y="price",
+    data=df,
+    ax=ax,
+    color=PALETTE[3],
+    scatter_kws={"s": 14, "alpha": 0.7},
+    line_kws={"color": "#0b0b0b"},
+)
 ax.set_title(f"stroke: r = {r_s:.4f}")
-ax.set_ylim(0,)
+ax.set_ylim(
+    0,
+)
 fig.tight_layout()
 fig.savefig(FIGS / "task2_stroke_price.png", dpi=200)
 plt.close("all")
 
-task4 = df[["body-style", "price"]].groupby(["body-style"], as_index=False)["price"].mean()
+task4 = (
+    df[["body-style", "price"]]
+    .groupby(["body-style"], as_index=False)["price"]
+    .mean()
+)
 task4 = task4.sort_values("price", ascending=False).reset_index(drop=True)
 task4["count"] = task4["body-style"].map(df["body-style"].value_counts())
 print(task4.round(2))
@@ -197,13 +269,16 @@ for name in ["fwd", "rwd", "4wd"]:
     g = grouped_test2.get_group(name)["price"]
     print(f"{name}: n = {len(g)}, mean = {g.mean():.2f}, std = {g.std():.2f}")
 
-f_val, p_val = stats.f_oneway(grouped_test2.get_group("fwd")["price"],
-                              grouped_test2.get_group("rwd")["price"],
-                              grouped_test2.get_group("4wd")["price"])
+f_val, p_val = stats.f_oneway(
+    grouped_test2.get_group("fwd")["price"],
+    grouped_test2.get_group("rwd")["price"],
+    grouped_test2.get_group("4wd")["price"],
+)
 print("ANOVA fwd, rwd, 4wd: F =", f_val, " P =", p_val)
 for a, b in [("fwd", "rwd"), ("4wd", "rwd"), ("4wd", "fwd")]:
-    f_val, p_val = stats.f_oneway(grouped_test2.get_group(a)["price"],
-                                  grouped_test2.get_group(b)["price"])
+    f_val, p_val = stats.f_oneway(
+        grouped_test2.get_group(a)["price"], grouped_test2.get_group(b)["price"]
+    )
     print(f"ANOVA {a} vs {b}: F = {f_val:.4f}  P = {p_val:.4e}")
 
 def anova(factor, target="price"):
@@ -211,12 +286,26 @@ def anova(factor, target="price"):
     f_val, p_val = stats.f_oneway(*groups)
     lev_stat, lev_p = stats.levene(*groups)
     kw_stat, kw_p = stats.kruskal(*groups)
-    return {"factor": factor, "groups": len(groups), "min_n": min(len(g) for g in groups),
-            "F": round(f_val, 4), "p_value": f"{p_val:.3e}",
-            "levene_p": f"{lev_p:.3e}", "kruskal_p": f"{kw_p:.3e}"}
+    return {
+        "factor": factor,
+        "groups": len(groups),
+        "min_n": min(len(g) for g in groups),
+        "F": round(f_val, 4),
+        "p_value": f"{p_val:.3e}",
+        "levene_p": f"{lev_p:.3e}",
+        "kruskal_p": f"{kw_p:.3e}",
+    }
 
-factors = ["drive-wheels", "body-style", "engine-location", "fuel-type",
-           "aspiration", "num-of-doors", "num-of-cylinders"]
+
+factors = [
+    "drive-wheels",
+    "body-style",
+    "engine-location",
+    "fuel-type",
+    "aspiration",
+    "num-of-doors",
+    "num-of-cylinders",
+]
 anova_table = pd.DataFrame([anova(f) for f in factors])
 print(anova_table)
 
@@ -225,9 +314,18 @@ extra = []
 for factor, target in pairs:
     groups = [g[target].values for _, g in df.groupby(factor)]
     f_val, p_val = stats.f_oneway(*groups)
-    extra.append({"factor": factor, "target": target,
-                  "F": round(f_val, 4), "p_value": f"{p_val:.3e}"})
-    print(df.groupby(factor)[target].agg(["count", "mean", "std"]).round(2), end="\n\n")
+    extra.append(
+        {
+            "factor": factor,
+            "target": target,
+            "F": round(f_val, 4),
+            "p_value": f"{p_val:.3e}",
+        }
+    )
+    print(
+        df.groupby(factor)[target].agg(["count", "mean", "std"]).round(2),
+        end="\n\n",
+    )
 print(pd.DataFrame(extra))
 
 fig, axes = plt.subplots(1, 2, figsize=(11, 3.8))
