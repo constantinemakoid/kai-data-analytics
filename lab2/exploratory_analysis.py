@@ -108,9 +108,7 @@ for ax, (col, color) in zip(axes, pairs):
     )
     r = df[[col, "price"]].corr().iloc[0, 1]
     ax.set_title(f"{col}: r = {r:.4f}")
-    ax.set_ylim(
-        0,
-    )
+    ax.set_ylim(0)
 fig.tight_layout()
 fig.savefig(FIGS / "regplots_price.png", dpi=200)
 plt.close("all")
@@ -219,9 +217,7 @@ sns.regplot(
     line_kws={"color": "#0b0b0b"},
 )
 ax.set_title(f"stroke: r = {r_s:.4f}")
-ax.set_ylim(
-    0,
-)
+ax.set_ylim(0)
 fig.tight_layout()
 fig.savefig(FIGS / "task2_stroke_price.png", dpi=200)
 plt.close("all")

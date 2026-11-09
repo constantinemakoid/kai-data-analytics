@@ -141,9 +141,7 @@ sns.regplot(
     scatter_kws={"s": 14, "alpha": 0.7},
     line_kws={"color": "#0b0b0b"},
 )
-axes[0].set_ylim(
-    0,
-)
+axes[0].set_ylim(0)
 axes[0].set_title("Regression plot: engine-size vs price")
 sns.residplot(
     x=df["engine-size"],
