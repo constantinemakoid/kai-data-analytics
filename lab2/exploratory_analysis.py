@@ -227,6 +227,7 @@ for factor, target in pairs:
     f_val, p_val = stats.f_oneway(*groups)
     extra.append({"factor": factor, "target": target,
                   "F": round(f_val, 4), "p_value": f"{p_val:.3e}"})
+    print(df.groupby(factor)[target].agg(["count", "mean", "std"]).round(2), end="\n\n")
 print(pd.DataFrame(extra))
 
 fig, axes = plt.subplots(1, 2, figsize=(11, 3.8))
